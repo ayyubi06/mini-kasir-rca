@@ -16,6 +16,20 @@ def buat_nomor_struk():
     return "TRX-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
+def _input_angka_positif(prompt):
+    """Minta input angka >= 0; tolak non-angka dan nilai negatif."""
+    while True:
+        try:
+            nilai = int(input(prompt))
+        except ValueError:
+            print("Input harus berupa angka. Coba lagi.")
+            continue
+        if nilai < 0:
+            print("Nilai tidak boleh negatif. Coba lagi.")
+            continue
+        return nilai
+
+
 def input_barang():
     items = []
     print("=== INPUT BARANG (ketik 'selesai' untuk selesai) ===")
@@ -23,8 +37,8 @@ def input_barang():
         nama = input("Nama barang: ")
         if nama.lower() == "selesai":
             break
-        harga = int(input("Harga satuan (Rp): "))
-        jumlah = int(input("Jumlah: "))
+        harga = _input_angka_positif("Harga satuan (Rp): ")
+        jumlah = _input_angka_positif("Jumlah: ")
         items.append({"nama": nama, "harga": harga, "jumlah": jumlah})
     return items
 
@@ -34,13 +48,13 @@ def hitung_subtotal(items):
 
 
 def hitung_diskon(subtotal):
-    if subtotal > 100000:
-        return subtotal * 0.01
+    if subtotal >= 100000:
+        return subtotal * 0.10
     return 0
 
 
 def hitung_pajak(subtotal, diskon):
-    return subtotal * 0.11
+    return (subtotal - diskon) * 0.11
 
 
 def susun_struk(no_struk, waktu, items, subtotal, diskon, pajak, total, bayar, kembalian):
