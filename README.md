@@ -1,17 +1,19 @@
-# Mini Kasir RCA
+# Mini Kasir — Test Case Design & Unit Test
 
-Mini program **Sistem Kasir Sederhana** (Python CLI) untuk Tugas Pertemuan 3
-mata kuliah **Analisis & Pengujian Sistem**: membuat mini program, menemukan
-defect/fault, dan menyusun Root Cause Analysis (RCA).
+Mini program **Sistem Kasir Sederhana** (Python CLI) untuk mata kuliah
+**Analisis & Pengujian Sistem**.
 
-Program ini **sengaja mengandung beberapa fault** — bagian serunya adalah
-menemukannya lewat pengujian. Lihat [RCA.md](RCA.md) untuk hasil analisis
-lengkapnya (atau coba temukan sendiri dulu!).
+- **Tugas Pertemuan 3**: membuat mini program, menemukan defect/fault, dan
+  menyusun Root Cause Analysis (RCA). Versi ber-fault tersimpan di riwayat
+  commit — lihat [RCA.md](RCA.md) untuk analisis lengkapnya.
+- **Tugas Pertemuan 4** (versi saat ini): Test Case Design format Slide 14
+  (Myers, 2012) + unit test otomatis (pytest). Keempat fault dari Tugas 3
+  sudah diperbaiki; test membuktikan perbaikannya.
 
 ## Persyaratan
 
-- Python 3.x (tidak butuh library tambahan apa pun)
-- Git (untuk clone repo)
+- Python 3.x
+- pytest (`pip install pytest`) — hanya untuk menjalankan test
 
 ## Cara menjalankan
 
@@ -24,6 +26,9 @@ cd mini-kasir-rca
 
 # 3. Jalankan programnya
 python3 kasir.py
+
+# 4. Jalankan unit test-nya
+python3 -m pytest test_kasir.py -v
 ```
 
 > Pengguna Windows: ganti `python3` dengan `python`.
@@ -37,45 +42,51 @@ Nama barang: Beras
 Harga satuan (Rp): 50000
 Jumlah: 2
 Nama barang: selesai
-Total Rp111,000. Bayar (Rp): 150000
+Total Rp99,900. Bayar (Rp): 150000
 
 ========== STRUK BELANJA ==========
 Beras x2 @ Rp50,000 = Rp100,000
 ----------------------------------
 Subtotal   : Rp100,000
-Diskon     : Rp0
-Pajak (11%): Rp11,000
-TOTAL      : Rp111,000
+Diskon     : Rp10,000
+Pajak (11%): Rp9,900
+TOTAL      : Rp99,900
 Bayar      : Rp150,000
-Kembalian  : Rp39,000
+Kembalian  : Rp50,100
 ==================================
 ```
 
-## Spesifikasi yang seharusnya
-
-Program ini ditulis berdasarkan spesifikasi berikut:
+## Spesifikasi
 
 - **Diskon 10%** jika subtotal **>=** Rp100.000
 - **Pajak (PPN) 11%** dihitung dari total **setelah** diskon
 - **Kembalian** = bayar − total
-- Input harga dan jumlah harus angka positif
+- Input harga dan jumlah harus angka dan tidak negatif
+  (non-angka dan negatif ditolak dengan pesan yang jelas)
 
-## Tantangan: coba temukan fault-nya!
+## Test Case Design & Unit Test (Tugas 4)
 
-Sebelum mengintip [RCA.md](RCA.md), coba uji programnya dengan skenario ini
-dan bandingkan hasilnya dengan spesifikasi di atas:
+Desain test case memakai teknik *equivalence partitioning* dan
+*boundary value analysis*, didokumentasikan format Slide 14
+(Test case | Input | Expected output):
 
-| # | Skenario uji | Cara | Yang diharapkan | Yang terjadi |
-|---|--------------|------|-----------------|--------------|
-| 1 | Diskon belanja besar | Input 1 barang Rp200.000 × 1 | Diskon Rp20.000 (10%) | ??? |
-| 2 | Batas tepat Rp100.000 | Input 1 barang Rp100.000 × 1 | Dapat diskon (syarat `>=`) | ??? |
-| 3 | Dasar perhitungan pajak | Belanja Rp200.000, lihat pajak | 11% × (200.000 − diskon) | ??? |
-| 4 | Input tidak valid | Isi harga dengan `abc`, lalu coba harga `-5000` | Pesan error yang jelas / ditolak | ??? |
+→ [**TEST_CASE_DESIGN.md**](TEST_CASE_DESIGN.md)
 
-## Hasil analisis
+Otomatisasi: `test_kasir.py` — 11 test (pytest), mencakup 4 fungsi
+(`hitung_subtotal`, `hitung_diskon`, `hitung_pajak`, `susun_struk`)
+dan `input_barang` via mock. Dijalankan terhadap kode ber-fault,
+5 test gagal tepat pada keempat fault — sesudah perbaikan, 11/11 lolos.
 
-Analisis akar masalah tiap fault dengan metode **5 Whys**, lengkap dengan
-langkah reproduksi, dampak, dan rekomendasi perbaikan/pencegahan:
+## Fault yang dulu ada (Tugas 3)
+
+| # | Fault | Status |
+|---|-------|--------|
+| 1 | Diskon 1%, seharusnya 10% | Diperbaiki |
+| 2 | Tepat Rp100.000 tidak dapat diskon (`>` vs `>=`) | Diperbaiki |
+| 3 | Pajak dihitung sebelum diskon | Diperbaiki |
+| 4 | Input non-angka crash, harga negatif diterima | Diperbaiki |
+
+Analisis akar masalah tiap fault (metode 5 Whys):
 
 → [**RCA.md**](RCA.md)
 
@@ -84,5 +95,7 @@ langkah reproduksi, dampak, dan rekomendasi perbaikan/pencegahan:
 | File | Keterangan |
 |------|------------|
 | `kasir.py` | Mini program sistem kasir |
-| `RCA.md` | Root Cause Analysis tiap fault (metode 5 Whys) |
+| `test_kasir.py` | Unit test otomatis (pytest) — Tugas 4 |
+| `TEST_CASE_DESIGN.md` | Tabel test case format Slide 14 — Tugas 4 |
+| `RCA.md` | Root Cause Analysis tiap fault — Tugas 3 |
 | `README.md` | Panduan ini |
